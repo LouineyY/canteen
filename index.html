@@ -1,0 +1,736 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>食堂吃什么</title>
+<meta name="description" content="校园食堂点评推荐：按菜评分、只看最近、5 秒点评、一键决定今天吃什么。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍱</text></svg>">
+<style>
+:root{
+  --bg:#f6f5f2; --card:#ffffff; --ink:#1f2328; --sub:#6b7076; --line:#e8e6e1;
+  --brand:#ff6a3d; --brand-soft:#fff0ea; --good:#1f9d55; --good-soft:#e8f6ee;
+  --bad:#d64545; --bad-soft:#fdecec; --warn:#c77700; --warn-soft:#fff5e0;
+  --chip:#f1efea; --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#141517; --card:#1e2023; --ink:#eceef0; --sub:#9aa0a6; --line:#2c2f33;
+    --brand:#ff7a50; --brand-soft:#3a2219; --good:#3ecf7a; --good-soft:#15301f;
+    --bad:#ff6b6b; --bad-soft:#3a1c1c; --warn:#f0a531; --warn-soft:#352812;
+    --chip:#2a2d31; --shadow:none;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,sans-serif;
+  font-size:15px;line-height:1.5}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,select,textarea{font:inherit;color:inherit}
+.app{max-width:520px;margin:0 auto;min-height:100vh;padding:0 16px 96px}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:14px 0 10px;display:flex;align-items:center;justify-content:space-between}
+header.top h1{font-size:20px;margin:0;letter-spacing:.5px}
+header.top .meal{font-size:13px;color:var(--sub)}
+.card{background:var(--card);border-radius:16px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px;border:1px solid var(--line)}
+.sec-title{display:flex;align-items:baseline;justify-content:space-between;margin:22px 2px 10px}
+.sec-title h2{font-size:17px;margin:0}
+.sec-title small{color:var(--sub);font-size:12px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:6px 12px;border-radius:999px;background:var(--chip);font-size:13px;white-space:nowrap;border:1px solid transparent}
+.chip.on{background:var(--brand-soft);color:var(--brand);border-color:var(--brand)}
+.chip.good{background:var(--good-soft);color:var(--good)}
+.chip.bad{background:var(--bad-soft);color:var(--bad)}
+.label{font-size:12px;color:var(--sub);margin:12px 0 6px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 18px;border-radius:12px;font-weight:600}
+.btn.primary{background:var(--brand);color:#fff;width:100%;font-size:16px}
+.btn.ghost{background:var(--chip)}
+.btn:active{transform:scale(.98)}
+.ask{display:flex;gap:8px;margin-top:12px}
+.ask input{flex:1;min-width:0;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
+.ask button{padding:0 14px;border-radius:12px;background:var(--ink);color:var(--bg);font-weight:600}
+.hint{font-size:12px;color:var(--sub);margin-top:6px}
+
+.dish{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.dish:first-child{border-top:0}
+.dish .emo{width:52px;height:52px;flex:none;border-radius:12px;background:var(--chip);display:grid;place-items:center;font-size:28px}
+.dish .info{flex:1;min-width:0}
+.dish .name{font-weight:600;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dish .meta{font-size:12px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dish .score{text-align:right;flex:none}
+.dish .score b{font-size:18px}
+.dish .score span{display:block;font-size:11px;color:var(--sub)}
+.tag-new{font-size:10px;padding:1px 6px;border-radius:6px;background:var(--brand);color:#fff;font-weight:600}
+.tag-warn{font-size:10px;padding:1px 6px;border-radius:6px;background:var(--bad);color:#fff;font-weight:600}
+.clickable{cursor:pointer}
+
+.pick{border:2px solid var(--brand);position:relative}
+.pick .rank{position:absolute;top:-10px;left:14px;background:var(--brand);color:#fff;font-size:12px;padding:2px 10px;border-radius:999px;font-weight:600}
+.pick .why{font-size:13px;color:var(--sub);margin-top:8px;padding-top:8px;border-top:1px dashed var(--line)}
+.picks .card{margin-top:14px}
+
+.alert{background:var(--bad-soft);border:1px solid transparent;color:var(--bad);border-radius:14px;padding:12px 14px;font-size:13px;margin-bottom:14px}
+.alert b{color:var(--bad)}
+.alert .row{display:flex;justify-content:space-between;gap:8px;padding:4px 0;cursor:pointer}
+
+.tabs2{display:flex;gap:6px;background:var(--chip);padding:4px;border-radius:12px;margin-bottom:10px}
+.tabs2 button{flex:1;padding:8px;border-radius:9px;font-size:14px;color:var(--sub)}
+.tabs2 button.on{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--shadow)}
+
+.hscroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.hscroll::-webkit-scrollbar{display:none}
+.newcard{flex:none;width:136px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;cursor:pointer}
+.newcard .emo{font-size:34px}
+.newcard .n{font-weight:600;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.newcard .m{font-size:12px;color:var(--sub)}
+
+nav.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:10;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav.tabbar .in{max-width:520px;margin:0 auto;display:flex}
+nav.tabbar button{flex:1;padding:8px 0 10px;font-size:11px;color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:2px}
+nav.tabbar button .i{font-size:20px;filter:grayscale(1);opacity:.7}
+nav.tabbar button.on{color:var(--brand);font-weight:600}
+nav.tabbar button.on .i{filter:none;opacity:1}
+
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20;display:none}
+.mask.show{display:block}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:21;max-height:90vh;overflow-y:auto;background:var(--bg);border-radius:20px 20px 0 0;transform:translateY(100%);transition:transform .25s ease}
+.sheet.show{transform:none}
+.sheet .in{max-width:520px;margin:0 auto;padding:10px 16px 32px}
+.sheet .grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:4px auto 10px}
+.sheet .close{position:sticky;top:0;float:right;font-size:22px;color:var(--sub);padding:0 4px}
+
+.hero{display:flex;gap:14px;align-items:center}
+.hero .emo{font-size:48px;width:76px;height:76px;border-radius:18px;background:var(--chip);display:grid;place-items:center;flex:none}
+.hero h3{margin:0;font-size:20px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.stats div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.stats b{display:block;font-size:20px}
+.stats span{font-size:11px;color:var(--sub)}
+.ai{background:linear-gradient(135deg,var(--brand-soft),var(--card));border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:14px;font-size:14px}
+.ai .t{font-size:12px;font-weight:700;color:var(--brand);margin-bottom:6px}
+.bars{display:flex;align-items:flex-end;gap:6px;height:70px;margin-top:8px}
+.bars .b{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+.bars .b i{display:block;width:100%;border-radius:4px 4px 0 0;background:var(--good);min-height:2px}
+.bars .b i.low{background:var(--bad)}
+.bars .b i.none{background:var(--line)}
+.bars .b span{font-size:10px;color:var(--sub)}
+.review{padding:10px 0;border-top:1px solid var(--line);font-size:14px}
+.review:first-child{border-top:0}
+.review .h{display:flex;justify-content:space-between;font-size:12px;color:var(--sub)}
+.review .tg{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.review .tg span{font-size:11px;padding:1px 8px;border-radius:999px;background:var(--chip)}
+
+.vote{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.vote button{padding:16px;border-radius:14px;background:var(--card);border:2px solid var(--line);font-size:16px;font-weight:600}
+.vote button.up.on{border-color:var(--good);background:var(--good-soft);color:var(--good)}
+.vote button.down.on{border-color:var(--bad);background:var(--bad-soft);color:var(--bad)}
+textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px;background:var(--card);resize:none}
+
+.search{width:100%;padding:11px 14px;border-radius:12px;border:1px solid var(--line);background:var(--card);margin-bottom:10px}
+.row2{display:flex;gap:8px;margin-bottom:10px}
+.row2 select{flex:1;padding:9px;border-radius:10px;border:1px solid var(--line);background:var(--card)}
+.empty{text-align:center;color:var(--sub);padding:24px 0;font-size:14px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:999px;font-size:14px;z-index:40;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+.doc h3{font-size:16px;margin:4px 0 8px}
+.doc p,.doc li{font-size:14px;color:var(--ink)}
+.doc ul{padding-left:20px;margin:6px 0}
+.doc .muted{color:var(--sub)}
+.doc table{width:100%;border-collapse:collapse;font-size:13px}
+.doc td,.doc th{border-top:1px solid var(--line);padding:8px 4px;text-align:left;vertical-align:top}
+.flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px}
+.flow span{background:var(--chip);padding:4px 10px;border-radius:8px}
+.flow em{font-style:normal;color:var(--sub)}
+.view{display:none}.view.on{display:block}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1>🍱 食堂吃什么</h1>
+    <div class="meal" id="mealTime"></div>
+  </header>
+
+  <!-- 首页 -->
+  <section class="view on" id="v-home">
+    <div id="alertBox"></div>
+
+    <div class="card">
+      <div style="font-weight:700;font-size:16px">现在想吃点什么？</div>
+      <div class="label">预算</div>
+      <div class="chips" data-group="budget">
+        <button class="chip" data-v="10">10 元内</button>
+        <button class="chip on" data-v="15">15 元内</button>
+        <button class="chip" data-v="20">20 元内</button>
+        <button class="chip" data-v="99">不限</button>
+      </div>
+      <div class="label">口味</div>
+      <div class="chips" data-group="taste">
+        <button class="chip on" data-v="any">随便</button>
+        <button class="chip" data-v="spicy">想吃辣</button>
+        <button class="chip" data-v="light">清淡点</button>
+        <button class="chip" data-v="nospicy">不吃辣</button>
+      </div>
+      <div class="label">离我近的食堂</div>
+      <div class="chips" data-group="canteen">
+        <button class="chip on" data-v="any">都行</button>
+      </div>
+      <div class="label">其他</div>
+      <div class="chips" data-group="extra" data-multi="1">
+        <button class="chip" data-v="fast">赶时间</button>
+        <button class="chip" data-v="new">想尝新</button>
+        <button class="chip" data-v="noodle">想吃面</button>
+        <button class="chip" data-v="rice">想吃饭</button>
+      </div>
+      <div style="margin-top:16px"><button class="btn primary" id="goPick">🎲 帮我决定</button></div>
+      <div class="ask">
+        <input id="askInput" placeholder="或者直接说：预算12，想吃辣的，赶时间">
+        <button id="askBtn">问问</button>
+      </div>
+      <div class="hint">支持说预算、口味、食堂、赶时间、面/饭、尝新等</div>
+    </div>
+
+    <div class="picks" id="picks"></div>
+
+    <div class="sec-title"><h2>✨ 今日新菜</h2><small>近 7 天上新</small></div>
+    <div class="hscroll" id="newList"></div>
+
+    <div class="sec-title"><h2>📊 本周榜单</h2><small>只算近 7 天的评价</small></div>
+    <div class="card">
+      <div class="tabs2" id="rankTabs">
+        <button class="on" data-v="red">🔥 红榜</button>
+        <button data-v="black">⚠️ 避雷榜</button>
+      </div>
+      <div id="rankList"></div>
+    </div>
+  </section>
+
+  <!-- 全部菜品 -->
+  <section class="view" id="v-all">
+    <input class="search" id="q" placeholder="搜菜名、窗口，比如：麻辣烫">
+    <div class="row2">
+      <select id="fCanteen"></select>
+      <select id="fSort">
+        <option value="score">按近期好评</option>
+        <option value="price">按价格低</option>
+        <option value="hot">按评价数</option>
+        <option value="new">新菜优先</option>
+      </select>
+    </div>
+    <div class="card" id="allList"></div>
+  </section>
+
+  <!-- 我的 -->
+  <section class="view" id="v-me">
+    <div class="card">
+      <div style="font-weight:700;font-size:16px">🧾 我的口味档案</div>
+      <div class="hint" style="margin-top:2px">设置后，「帮我决定」会默认按这个来</div>
+      <div class="label">默认预算</div>
+      <div class="chips" data-pgroup="budget">
+        <button class="chip" data-v="10">10 元内</button>
+        <button class="chip" data-v="15">15 元内</button>
+        <button class="chip" data-v="20">20 元内</button>
+        <button class="chip" data-v="99">不限</button>
+      </div>
+      <div class="label">口味偏好</div>
+      <div class="chips" data-pgroup="taste">
+        <button class="chip" data-v="any">随便</button>
+        <button class="chip" data-v="spicy">爱吃辣</button>
+        <button class="chip" data-v="light">偏清淡</button>
+        <button class="chip" data-v="nospicy">不吃辣</button>
+      </div>
+      <div class="label">常去食堂</div>
+      <div class="chips" data-pgroup="canteen"></div>
+    </div>
+
+    <div class="sec-title"><h2>⭐ 收藏</h2><small id="favCount"></small></div>
+    <div class="card" id="favList"></div>
+
+    <div class="sec-title"><h2>✍️ 我的点评</h2><small id="myCount"></small></div>
+    <div class="card" id="myList"></div>
+
+    <div style="text-align:center;margin-top:10px"><button class="btn ghost" id="resetBtn" style="font-size:13px">清空我的数据</button></div>
+  </section>
+
+  <!-- 设计说明 -->
+  <section class="view doc" id="v-about">
+    <div class="card">
+      <h3>为什么不直接用大众点评？</h3>
+      <p class="muted">大众点评只给一家店打分，学生在食堂遇到的是另外几个问题：</p>
+      <table>
+        <tr><th style="width:34%">痛点</th><th>这里怎么做</th></tr>
+        <tr><td>同一个窗口有的菜好吃、有的难吃</td><td><b>按菜评分</b>，不按窗口或食堂</td></tr>
+        <tr><td>换了师傅、换了菜单，以前的好评就不准了</td><td><b>只看最近 7 天</b>，越新的评价权重越高</td></tr>
+        <tr><td>学生懒得写长评，评价太少</td><td><b>5 秒点评</b>：👍/👎 + 选标签，文字可以不写</td></tr>
+        <tr><td>站在食堂门口不知道吃什么</td><td><b>一键推荐</b>，直接给 1~3 个选择和理由，不让你自己翻列表</td></tr>
+        <tr><td>怕踩雷</td><td><b>踩雷预警</b>：某道菜最近差评突然变多就标红</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>核心流程</h3>
+      <div class="flow"><span>打开</span><em>→</em><span>选预算/口味，或直接说需求</span><em>→</em><span>拿到 3 个推荐和理由</span><em>→</em><span>看菜品详情和 AI 总结</span><em>→</em><span>吃完 5 秒点评</span><em>→</em><span>榜单和推荐跟着变</span></div>
+      <p class="muted" style="margin-top:10px">可以自己试一下：给一道菜连点几个 👎，它会进避雷榜，推荐里也会排到后面。</p>
+    </div>
+    <div class="card">
+      <h3>AI 用在哪</h3>
+      <ul>
+        <li><b>评论总结</b>：把几十条短评压缩成一句话，加上优点和缺点</li>
+        <li><b>踩雷预警</b>：近 3 天好评率比之前明显下降就提醒</li>
+        <li><b>对话式推荐</b>：用一句话说需求，比如“预算 12，想吃辣，赶时间”</li>
+        <li><b>拍照识菜</b>（规划中）：拍一下自动认出是哪道菜，降低点评门槛</li>
+      </ul>
+      <p class="muted">现在是演示版：总结和语义理解用规则实现，没有接后端。正式版可以换成大模型，并加上后端存储。</p>
+    </div>
+    <div class="card">
+      <h3>推荐怎么排序</h3>
+      <p>得分 = 近期好评率（按时间衰减加权）× 置信度（评价越多越可信）+ 新菜加分 + 口味/预算/食堂匹配 − 踩雷扣分，最后加一点随机，免得天天推同一道。</p>
+    </div>
+    <div class="card">
+      <h3>后续迭代</h3>
+      <ul>
+        <li>接入食堂真实菜单，各窗口自己上新菜</li>
+        <li>拍照识菜，加实拍图</li>
+        <li>高峰期排队人数估计（按评价里的“排队久”标签和时间段来算）</li>
+        <li>接校园卡消费记录，自动提醒“吃完点评一下”</li>
+        <li>防刷评：一卡一票，只有在这个窗口消费过才能点评</li>
+      </ul>
+    </div>
+    <p class="muted" style="text-align:center;font-size:12px">演示数据都是虚构的，你的点评只保存在自己的浏览器里</p>
+  </section>
+</div>
+
+<nav class="tabbar"><div class="in">
+  <button class="on" data-view="home"><span class="i">🍱</span>今天吃什么</button>
+  <button data-view="all"><span class="i">📋</span>全部菜品</button>
+  <button data-view="me"><span class="i">🙋</span>我的</button>
+  <button data-view="about"><span class="i">💡</span>设计说明</button>
+</div></nav>
+
+<div class="mask" id="mask"></div>
+<div class="sheet" id="sheet"><div class="in" id="sheetIn"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ========== 模拟数据 ========== */
+const CANTEENS = [
+  {id:'c1', name:'一食堂·桃李园'},
+  {id:'c2', name:'二食堂·芳华苑'},
+  {id:'c3', name:'三食堂·风味街'},
+];
+// base: 基础好评率；drop: 最近是否突然变差；isNew: 上新天数；fast: 出餐快
+const DISHES = [
+  ['d1','红烧肉盖饭','🍖','c1','大锅菜窗口',12,['rice','meat'],.88],
+  ['d2','番茄炒蛋','🍅','c1','大锅菜窗口',5,['rice','veg','light'],.9,{fast:1}],
+  ['d3','鱼香肉丝','🥢','c1','大锅菜窗口',8,['rice','meat'],.52,{drop:1}],
+  ['d4','清炒时蔬','🥬','c1','大锅菜窗口',4,['veg','light'],.74,{fast:1}],
+  ['d5','兰州牛肉面','🍜','c1','面食窗口',13,['noodle','meat'],.85],
+  ['d6','西红柿鸡蛋面','🍝','c1','面食窗口',10,['noodle','light'],.8,{fast:1}],
+  ['d7','肉夹馍','🥙','c1','面食窗口',8,['meat'],.83,{fast:1}],
+  ['d8','黄焖鸡米饭','🍗','c1','黄焖鸡',16,['rice','meat'],.78],
+  ['d9','黄焖排骨','🍖','c1','黄焖鸡',19,['rice','meat'],.7,{isNew:2}],
+  ['d10','麻辣香锅','🌶️','c2','香锅窗口',22,['spicy','meat'],.86],
+  ['d11','干锅花菜','🥦','c2','香锅窗口',14,['spicy','veg'],.79],
+  ['d12','麻辣烫','🍲','c2','麻辣烫',15,['spicy','noodle'],.82],
+  ['d13','番茄麻辣烫','🍅','c2','麻辣烫',15,['noodle','light'],.77,{isNew:4}],
+  ['d14','广式烧腊双拼','🍱','c2','烧腊窗口',18,['rice','meat'],.84],
+  ['d15','蜜汁叉烧饭','🍯','c2','烧腊窗口',15,['rice','meat'],.89],
+  ['d16','白切鸡饭','🐔','c2','烧腊窗口',16,['rice','meat','light'],.6,{drop:1}],
+  ['d17','砂锅米线','🍜','c2','砂锅窗口',13,['noodle','light'],.81],
+  ['d18','酸菜鱼米线','🐟','c2','砂锅窗口',16,['noodle','spicy'],.83,{isNew:1}],
+  ['d19','鸡蛋灌饼','🥚','c2','早餐窗口',5,['light'],.87,{fast:1}],
+  ['d20','小笼包（8个）','🥟','c2','早餐窗口',7,['meat'],.76,{fast:1}],
+  ['d21','重庆小面','🍜','c3','川味窗口',11,['noodle','spicy'],.8,{fast:1}],
+  ['d22','水煮肉片','🥩','c3','川味窗口',17,['rice','spicy','meat'],.84],
+  ['d23','宫保鸡丁','🥜','c3','川味窗口',13,['rice','spicy','meat'],.72],
+  ['d24','麻婆豆腐','🫕','c3','川味窗口',8,['rice','spicy','veg'],.86],
+  ['d25','韩式石锅拌饭','🥘','c3','韩餐窗口',17,['rice','meat'],.74],
+  ['d26','部队火锅','🍲','c3','韩餐窗口',21,['spicy','noodle','meat'],.68,{isNew:3}],
+  ['d27','日式咖喱饭','🍛','c3','日式简餐',16,['rice','meat'],.82],
+  ['d28','照烧鸡排饭','🍗','c3','日式简餐',17,['rice','meat'],.5,{drop:1}],
+  ['d29','鳗鱼饭','🐟','c3','日式简餐',26,['rice','meat'],.79,{isNew:5}],
+  ['d30','手抓饼','🫓','c3','小吃窗口',6,[],.8,{fast:1}],
+  ['d31','烤冷面','🥡','c3','小吃窗口',8,['spicy'],.78,{fast:1}],
+  ['d32','杨枝甘露','🥭','c3','甜品饮品',12,['light'],.85,{isNew:2}],
+  ['d33','皮蛋瘦肉粥','🥣','c1','粥铺',6,['light','rice'],.83,{fast:1}],
+  ['d34','南瓜小米粥','🎃','c1','粥铺',4,['light','veg'],.78,{fast:1,isNew:6}],
+].map(([id,name,emoji,canteen,win,price,tags,base,opt={}])=>({id,name,emoji,canteen,win,price,tags,base,...opt}));
+
+const POS_TAGS = ['好吃','份量足','性价比高','出餐快','干净卫生','会回购'];
+const NEG_TAGS = ['太咸','太油','份量少','排队久','不新鲜','有点贵','偏凉','味道淡'];
+const POS_TEXT = ['今天这份很稳','又来了，没失望','比想象中好吃','份量很实在','下课冲过去还有','阿姨手不抖',''];
+const NEG_TEXT = ['今天有点翻车','跟以前不一样了','咸到要喝两瓶水','肉少得可怜','等了二十分钟','吃完有点后悔',''];
+const NAMES = ['大一新生','考研人','干饭王','软件工程','隔壁宿舍','夜猫子','早八人','健身党','图书馆常驻'];
+
+const DAY = 86400000;
+const today0 = (()=>{const d=new Date();d.setHours(0,0,0,0);return d.getTime()})();
+
+// 可复现的随机数
+function rng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296}}
+function pickOne(r,a){return a[Math.floor(r()*a.length)]}
+
+function genSeedReviews(){
+  const out=[];
+  DISHES.forEach((d,i)=>{
+    const r=rng(i*977+13);
+    const span = d.isNew ? d.isNew : 14;
+    const n = d.isNew ? 4+Math.floor(r()*6) : 10+Math.floor(r()*22);
+    for(let k=0;k<n;k++){
+      const ago = Math.floor(r()*span);
+      let p = d.base;
+      let negPool = NEG_TAGS;
+      if(d.drop){ // 最近 3 天突然变差：之前好评多
+        if(ago<3){p=.25; negPool = d.id==='d3'?['太咸','太油']:d.id==='d16'?['不新鲜','偏凉']:['份量少','太油']}
+        else p=.86;
+      }else if(ago<3 && !d.isNew) p=Math.max(p,.93); // 其他菜近期保持稳定，避免样本少时误报
+      else if(d.isNew) p=Math.max(p,.9);
+      const up = r()<p;
+      const tags=[];
+      const pool = up?POS_TAGS:negPool;
+      const tn = 1+Math.floor(r()*2);
+      for(let t=0;t<tn;t++){const x=pickOne(r,pool);if(!tags.includes(x))tags.push(x)}
+      if(!up && d.fast===undefined && r()<.15 && !tags.includes('排队久')) tags.push('排队久');
+      out.push({dish:d.id,up,tags,text:pickOne(r,up?POS_TEXT:NEG_TEXT),ts:Math.min(today0-ago*DAY+Math.floor(r()*12+8)*3600000, Date.now()-(k%5+1)*1800000),user:pickOne(r,NAMES)});
+    }
+  });
+  return out;
+}
+const SEED = genSeedReviews();
+
+/* ========== 本地存储 ========== */
+const store = {
+  get(k,def){try{const v=localStorage.getItem('canteen.'+k);return v?JSON.parse(v):def}catch(e){return def}},
+  set(k,v){try{localStorage.setItem('canteen.'+k,JSON.stringify(v))}catch(e){}}
+};
+let myReviews = store.get('reviews',[]);
+let favs = store.get('favs',[]);
+let profile = store.get('profile',{budget:'15',taste:'any',canteen:'any'});
+
+function allReviews(){return SEED.concat(myReviews)}
+
+/* ========== 评分计算 ========== */
+function statsOf(id){
+  const rs = allReviews().filter(r=>r.dish===id).sort((a,b)=>b.ts-a.ts);
+  const now = Date.now();
+  let w=0, wu=0;
+  const recent7 = rs.filter(r=>now-r.ts<7*DAY);
+  rs.forEach(r=>{
+    const days=(now-r.ts)/DAY;
+    if(days>14) return;
+    const wt=Math.pow(.5,days/3); // 3 天半衰期
+    w+=wt; if(r.up) wu+=wt;
+  });
+  const rate = w? wu/w : 0;
+  // 贝叶斯平滑，评价少时向 70% 靠拢
+  const conf = recent7.length;
+  const smooth = (rate*w + .7*1.5)/(w+1.5);
+  const last3 = rs.filter(r=>now-r.ts<3*DAY), before = rs.filter(r=>now-r.ts>=3*DAY && now-r.ts<14*DAY);
+  const rate3 = last3.length? last3.filter(r=>r.up).length/last3.length : null;
+  const rateB = before.length? before.filter(r=>r.up).length/before.length : null;
+  const alert = rate3!==null && rateB!==null && last3.length>=3 && before.length>=4 && rateB-rate3>=.3;
+  const tagCount = {};
+  recent7.forEach(r=>r.tags.forEach(t=>tagCount[t]=(tagCount[t]||0)+1));
+  const days=[];
+  for(let i=6;i>=0;i--){
+    const dr = rs.filter(r=>r.ts>=today0-i*DAY && r.ts<today0-(i-1)*DAY);
+    days.push({i,n:dr.length,rate:dr.length?dr.filter(r=>r.up).length/dr.length:null});
+  }
+  const negRecent = last3.filter(r=>!r.up);
+  return {rs,recent7,rate,smooth,conf,alert,rate3,rateB,tagCount,days,negRecent,score:Math.round(smooth*100)};
+}
+let cache={};
+function S(id){return cache[id]||(cache[id]=statsOf(id))}
+function refresh(){cache={};}
+const D = id=>DISHES.find(d=>d.id===id);
+const C = id=>CANTEENS.find(c=>c.id===id);
+
+/* AI 一句话总结（演示版：规则生成） */
+function summarize(d){
+  const s=S(d.id);
+  if(!s.recent7.length) return '最近 7 天还没人评价，来当第一个吃螃蟹的人吧。';
+  const tags=Object.entries(s.tagCount).sort((a,b)=>b[1]-a[1]);
+  const pos=tags.filter(([t])=>POS_TAGS.includes(t)).slice(0,2).map(([t])=>'「'+t+'」');
+  const neg=tags.filter(([t])=>NEG_TAGS.includes(t)).slice(0,2).map(([t])=>'「'+t+'」');
+  const upN=s.recent7.filter(r=>r.up).length, pct=Math.round(upN/s.recent7.length*100);
+  let head;
+  if(pct>=80) head=`近 7 天 ${s.recent7.length} 人评价，${pct}% 说值得吃，属于闭眼入的稳定选手。`;
+  else if(pct>=60) head=`近 7 天 ${s.recent7.length} 人评价，${pct}% 好评，整体不错但有起伏。`;
+  else head=`近 7 天 ${s.recent7.length} 人评价，只有 ${pct}% 好评，建议谨慎。`;
+  let body='';
+  if(pos.length) body+=`大家夸得最多的是${pos.join('、')}`;
+  if(neg.length) body+=(body?'；':'')+`吐槽集中在${neg.join('、')}`;
+  if(body) body+='。';
+  let tail='';
+  if(s.alert){
+    const nt={};s.negRecent.forEach(r=>r.tags.forEach(t=>{if(NEG_TAGS.includes(t))nt[t]=(nt[t]||0)+1}));
+    const top=Object.entries(nt).sort((a,b)=>b[1]-a[1])[0];
+    tail=`⚠️ 注意：最近 3 天好评率从 ${Math.round(s.rateB*100)}% 掉到 ${Math.round(s.rate3*100)}%`+(top?`，多人反映「${top[0]}」`:'')+'，可能换了师傅或配方。';
+  }else if(d.isNew){
+    tail=`🆕 ${d.isNew} 天前刚上新，评价还在积累中。`;
+  }
+  return head+body+tail;
+}
+
+/* ========== 推荐 ========== */
+function currentFilter(){
+  const g=name=>[...document.querySelectorAll(`[data-group="${name}"] .chip.on`)].map(b=>b.dataset.v);
+  return {budget:+g('budget')[0], taste:g('taste')[0], canteen:g('canteen')[0], extra:g('extra')};
+}
+function recommend(f, seed){
+  const r=rng(seed);
+  const list=DISHES.map(d=>{
+    const s=S(d.id);
+    const reasons=[]; let sc=s.smooth*100;
+    if(d.price>f.budget) return null;
+    if(f.taste==='nospicy' && d.tags.includes('spicy')) return null;
+    if(f.taste==='spicy'){ if(d.tags.includes('spicy')){sc+=18;reasons.push('够辣')} else sc-=25 }
+    if(f.taste==='light'){ if(d.tags.includes('light')){sc+=18;reasons.push('口味清淡')} else if(d.tags.includes('spicy')) sc-=30; else sc-=8 }
+    if(f.canteen && f.canteen!=='any'){ if(d.canteen===f.canteen){sc+=15;reasons.push('离你近')} else sc-=20 }
+    if(f.extra.includes('fast')){ const q=s.tagCount['排队久']||0; if(d.fast){sc+=15;reasons.push('出餐快')} else if(q>=2) sc-=20; else sc-=5 }
+    if(f.extra.includes('noodle')){ if(d.tags.includes('noodle')) sc+=20; else sc-=30 }
+    if(f.extra.includes('rice')){ if(d.tags.includes('rice')) sc+=20; else sc-=30 }
+    if(d.isNew){ sc+= f.extra.includes('new')?25:6; reasons.push(`${d.isNew} 天前上新`) } else if(f.extra.includes('new')) sc-=10;
+    if(s.alert) sc-=40;
+    if(s.recent7.length) reasons.unshift(`近 7 天 ${Math.round(s.recent7.filter(x=>x.up).length/s.recent7.length*100)}% 好评`);
+    const topPos=Object.entries(s.tagCount).filter(([t])=>POS_TAGS.includes(t)).sort((a,b)=>b[1]-a[1])[0];
+    if(topPos) reasons.push(`常被夸「${topPos[0]}」`);
+    sc += r()*14; // 一点随机，避免天天同一道
+    if(favs.includes(d.id)){sc+=5;reasons.push('你收藏过')}
+    return {d,sc,reasons};
+  }).filter(Boolean).sort((a,b)=>b.sc-a.sc);
+  // 尽量不推同一个窗口
+  const res=[],wins=new Set();
+  for(const x of list){ if(res.length>=3)break; const k=x.d.canteen+x.d.win; if(wins.has(k))continue; wins.add(k); res.push(x) }
+  return res;
+}
+let pickSeed=Date.now()%100000;
+function renderPicks(f,fromAsk){
+  const box=document.getElementById('picks');
+  const res=recommend(f,pickSeed);
+  if(!res.length){box.innerHTML=`<div class="card empty">条件有点严格，没找到合适的 😅<br>试试放宽预算或口味</div>`;return}
+  const parts=[];
+  const desc=[];
+  if(f.budget<99)desc.push(`${f.budget} 元内`);
+  desc.push({any:'',spicy:'想吃辣',light:'清淡',nospicy:'不吃辣'}[f.taste]);
+  if(f.canteen!=='any')desc.push(C(f.canteen).name.split('·')[0]);
+  f.extra.forEach(e=>desc.push({fast:'赶时间',new:'尝新',noodle:'吃面',rice:'吃饭'}[e]));
+  parts.push(`<div class="sec-title"><h2>${fromAsk?'🤖 按你说的，推荐这几个':'🎯 就吃这个'}</h2><small>${desc.filter(Boolean).join(' · ')}</small></div>`);
+  res.forEach((x,i)=>{
+    const d=x.d,s=S(d.id);
+    parts.push(`<div class="card ${i===0?'pick':''} clickable" data-dish="${d.id}">
+      ${i===0?'<div class="rank">首选</div>':''}
+      <div class="dish" style="padding:${i===0?'6px':'0'} 0 0">
+        <div class="emo">${d.emoji}</div>
+        <div class="info"><div class="name">${d.name}${d.isNew?'<span class="tag-new">新</span>':''}</div>
+          <div class="meta">${C(d.canteen).name} · ${d.win} · ¥${d.price}</div></div>
+        <div class="score"><b style="color:${scoreColor(s.score)}">${s.score}</b><span>近期口碑</span></div>
+      </div>
+      <div class="why">💬 ${x.reasons.slice(0,4).join('，')}</div>
+    </div>`);
+  });
+  parts.push(`<div style="display:flex;gap:10px"><button class="btn ghost" style="flex:1" id="againBtn">🔄 换一批</button></div>`);
+  box.innerHTML=parts.join('');
+  document.getElementById('againBtn').onclick=()=>{pickSeed+=7;renderPicks(f,fromAsk)};
+  box.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function scoreColor(s){return s>=80?'var(--good)':s>=65?'var(--warn)':'var(--bad)'}
+
+/* 一句话需求解析（演示版：关键词规则） */
+function parseAsk(txt){
+  const f={budget:99,taste:'any',canteen:'any',extra:[]};
+  const m=txt.match(/(\d{1,3})\s*(块|元|r|以内|左右)?/i); if(m) f.budget=+m[1];
+  if(/不(要|想|能|吃)?辣|不辣|怕辣/.test(txt)) f.taste='nospicy';
+  else if(/辣|川|麻/.test(txt)) f.taste='spicy';
+  else if(/清淡|淡|养胃|不油|减脂|健康|胃不舒服|生病/.test(txt)) f.taste='light';
+  if(/快|赶|来不及|急|马上|上课|早八/.test(txt)) f.extra.push('fast');
+  if(/新|没吃过|尝鲜|换换口味/.test(txt)) f.extra.push('new');
+  if(/面|粉|米线/.test(txt)) f.extra.push('noodle');
+  else if(/饭|米饭|盖饭/.test(txt)) f.extra.push('rice');
+  if(/一食|桃李/.test(txt)) f.canteen='c1'; else if(/二食|芳华/.test(txt)) f.canteen='c2'; else if(/三食|风味/.test(txt)) f.canteen='c3';
+  return f;
+}
+
+/* ========== 列表渲染 ========== */
+function dishRow(d,extra=''){
+  const s=S(d.id);
+  return `<div class="dish clickable" data-dish="${d.id}">
+    <div class="emo">${d.emoji}</div>
+    <div class="info"><div class="name">${d.name}${d.isNew?'<span class="tag-new">新</span>':''}${s.alert?'<span class="tag-warn">近期差评多</span>':''}</div>
+      <div class="meta">${extra||`${C(d.canteen).name.split('·')[0]} · ${d.win} · ¥${d.price}`}</div></div>
+    <div class="score"><b style="color:${scoreColor(s.score)}">${s.score}</b><span>${s.recent7.length} 条近评</span></div>
+  </div>`;
+}
+function renderAlerts(){
+  const al=DISHES.filter(d=>S(d.id).alert);
+  const box=document.getElementById('alertBox');
+  if(!al.length){box.innerHTML='';return}
+  box.innerHTML=`<div class="alert"><div style="font-weight:700;margin-bottom:4px">🚨 踩雷预警 · 这几道菜最近 3 天差评突然变多</div>
+    ${al.map(d=>{const s=S(d.id);return `<div class="row" data-dish="${d.id}"><span>${d.emoji} ${d.name} <span style="opacity:.75">${C(d.canteen).name.split('·')[0]}·${d.win}</span></span><b>${Math.round(s.rateB*100)}% → ${Math.round(s.rate3*100)}%</b></div>`}).join('')}</div>`;
+}
+function renderNew(){
+  const list=DISHES.filter(d=>d.isNew).sort((a,b)=>a.isNew-b.isNew);
+  document.getElementById('newList').innerHTML=list.map(d=>{const s=S(d.id);return `<div class="newcard" data-dish="${d.id}">
+    <div class="emo">${d.emoji}</div><div class="n">${d.name}</div>
+    <div class="m">${C(d.canteen).name.split('·')[0]} · ¥${d.price}</div>
+    <div class="m">${d.isNew===1?'昨天':d.isNew+' 天前'}上新 · <b style="color:${scoreColor(s.score)}">${s.recent7.length?Math.round(s.recent7.filter(r=>r.up).length/s.recent7.length*100)+'%好评':'待评价'}</b></div></div>`}).join('');
+}
+let rankMode='red';
+function renderRank(){
+  const eligible=DISHES.filter(d=>S(d.id).recent7.length>=3);
+  let list;
+  if(rankMode==='red') list=eligible.filter(d=>!S(d.id).alert).sort((a,b)=>S(b.id).smooth-S(a.id).smooth).slice(0,6);
+  else list=eligible.sort((a,b)=>(S(b.id).alert-S(a.id).alert)||(S(a.id).smooth-S(b.id).smooth)).slice(0,6);
+  document.getElementById('rankList').innerHTML=list.map((d,i)=>{
+    const s=S(d.id);
+    const neg=Object.entries(s.tagCount).filter(([t])=>NEG_TAGS.includes(t)).sort((a,b)=>b[1]-a[1])[0];
+    const pos=Object.entries(s.tagCount).filter(([t])=>POS_TAGS.includes(t)).sort((a,b)=>b[1]-a[1])[0];
+    const meta=`${['🥇','🥈','🥉'][i]||'#'+(i+1)} ${C(d.canteen).name.split('·')[0]}·${d.win} · ¥${d.price}`+
+      (rankMode==='red'&&pos?` · 多人说「${pos[0]}」`:'')+(rankMode==='black'&&neg?` · 多人说「${neg[0]}」`:'');
+    return dishRow(d,meta);
+  }).join('');
+}
+function renderAll(){
+  const q=document.getElementById('q').value.trim();
+  const c=document.getElementById('fCanteen').value, so=document.getElementById('fSort').value;
+  let list=DISHES.filter(d=>(c==='any'||d.canteen===c)&&(!q||(d.name+d.win+C(d.canteen).name).includes(q)));
+  const k={score:(a,b)=>S(b.id).smooth-S(a.id).smooth,price:(a,b)=>a.price-b.price,hot:(a,b)=>S(b.id).recent7.length-S(a.id).recent7.length,new:(a,b)=>(a.isNew||99)-(b.isNew||99)}[so];
+  list.sort(k);
+  document.getElementById('allList').innerHTML=list.length?list.map(d=>dishRow(d)).join(''):'<div class="empty">没搜到这道菜</div>';
+}
+function renderMe(){
+  // profile chips
+  document.querySelectorAll('[data-pgroup]').forEach(g=>g.querySelectorAll('.chip').forEach(b=>b.classList.toggle('on',profile[g.dataset.pgroup]===b.dataset.v)));
+  const fl=favs.map(D).filter(Boolean);
+  document.getElementById('favCount').textContent=fl.length?fl.length+' 道':'';
+  document.getElementById('favList').innerHTML=fl.length?fl.map(d=>dishRow(d)).join(''):'<div class="empty">在菜品详情页点 ☆ 就能收藏</div>';
+  document.getElementById('myCount').textContent=myReviews.length?myReviews.length+' 条':'';
+  document.getElementById('myList').innerHTML=myReviews.length?myReviews.slice().sort((a,b)=>b.ts-a.ts).map(r=>{const d=D(r.dish);return `<div class="review clickable" data-dish="${d.id}">
+    <div class="h"><span>${d.emoji} ${d.name} · ${C(d.canteen).name.split('·')[0]}</span><span>${fmtTime(r.ts)}</span></div>
+    <div>${r.up?'👍 推荐':'👎 踩雷'} ${r.text?'· '+esc(r.text):''}</div>
+    <div class="tg">${r.tags.map(t=>`<span>${t}</span>`).join('')}</div></div>`}).join(''):'<div class="empty">还没写过点评，吃完点一下 👍/👎 就行</div>';
+}
+function renderHome(){renderAlerts();renderNew();renderRank()}
+function renderAllViews(){refresh();renderHome();renderAll();renderMe()}
+
+/* ========== 菜品详情 & 点评 ========== */
+function fmtTime(ts){const d=Math.floor((today0+DAY-1-ts)/DAY);const h=new Date(ts);const hm=String(h.getHours()).padStart(2,'0')+':'+String(h.getMinutes()).padStart(2,'0');return d<=0?'今天 '+hm:d===1?'昨天 '+hm:d+' 天前'}
+function esc(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function openSheet(html){document.getElementById('sheetIn').innerHTML='<div class="grab"></div><button class="close" data-close>×</button>'+html;document.getElementById('mask').classList.add('show');document.getElementById('sheet').classList.add('show');document.getElementById('sheet').scrollTop=0}
+function closeSheet(){document.getElementById('mask').classList.remove('show');document.getElementById('sheet').classList.remove('show')}
+
+function openDish(id){
+  const d=D(id), s=S(id);
+  const tags=Object.entries(s.tagCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const isFav=favs.includes(id);
+  const wd=['日','一','二','三','四','五','六'];
+  openSheet(`
+    <div class="hero"><div class="emo">${d.emoji}</div><div>
+      <h3>${d.name} ${d.isNew?'<span class="tag-new">新</span>':''}</h3>
+      <div style="color:var(--sub);font-size:13px">${C(d.canteen).name} · ${d.win}</div>
+      <div style="font-size:18px;font-weight:700;color:var(--brand)">¥${d.price}</div>
+    </div></div>
+    ${s.alert?`<div class="alert" style="margin:14px 0 0">🚨 <b>踩雷预警</b>：最近 3 天好评率 ${Math.round(s.rateB*100)}% → ${Math.round(s.rate3*100)}%，最近吃过的同学说要小心</div>`:''}
+    <div class="stats">
+      <div><b style="color:${scoreColor(s.score)}">${s.score}</b><span>近期口碑分</span></div>
+      <div><b>${s.recent7.length?Math.round(s.recent7.filter(r=>r.up).length/s.recent7.length*100)+'%':'-'}</b><span>7 天好评率</span></div>
+      <div><b>${s.recent7.length}</b><span>7 天评价数</span></div>
+    </div>
+    <div class="ai"><div class="t">✨ AI 一句话总结</div>${summarize(d)}</div>
+    <div class="card" style="margin-top:14px">
+      <div style="font-weight:600;font-size:14px">近 7 天好评走势</div>
+      <div class="bars">${s.days.map(x=>{const dt=new Date(today0-x.i*DAY);return `<div class="b"><i class="${x.rate===null?'none':x.rate<.6?'low':''}" style="height:${x.rate===null?4:Math.max(6,x.rate*56)}px" title="${x.n} 条"></i><span>${x.i===0?'今':'周'+wd[dt.getDay()]}</span></div>`}).join('')}</div>
+      ${tags.length?`<div style="font-weight:600;font-size:14px;margin-top:14px">大家怎么说</div><div class="chips" style="margin-top:8px">${tags.map(([t,n])=>`<span class="chip ${POS_TAGS.includes(t)?'good':'bad'}">${t} ${n}</span>`).join('')}</div>`:''}
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn primary" style="flex:2" data-review="${id}">✍️ 吃过了，5 秒点评</button>
+      <button class="btn ghost" style="flex:1" data-fav="${id}">${isFav?'★ 已收藏':'☆ 收藏'}</button>
+    </div>
+    <div class="sec-title"><h2>最新评价</h2><small>共 ${s.rs.length} 条</small></div>
+    <div class="card">${s.rs.slice(0,15).map(r=>`<div class="review">
+      <div class="h"><span>${r.mine?'🙋 我':esc(r.user||'同学')}</span><span>${fmtTime(r.ts)}</span></div>
+      <div>${r.up?'👍':'👎'} ${r.text?esc(r.text):''}</div>
+      <div class="tg">${r.tags.map(t=>`<span>${t}</span>`).join('')}</div></div>`).join('')||'<div class="empty">还没有评价</div>'}</div>
+  `);
+}
+function openReview(id){
+  const d=D(id); let up=null; const sel=new Set();
+  openSheet(`
+    <div class="hero"><div class="emo">${d.emoji}</div><div><h3>${d.name}</h3><div style="color:var(--sub);font-size:13px">${C(d.canteen).name} · ${d.win}</div></div></div>
+    <div class="label" style="margin-top:18px">这顿怎么样？</div>
+    <div class="vote"><button class="up" id="vUp">👍 推荐</button><button class="down" id="vDown">👎 踩雷</button></div>
+    <div class="label">选几个标签（可多选）</div>
+    <div class="chips" id="rTags"><span class="hint">先选 👍 或 👎</span></div>
+    <div class="label">想多说一句？（可不填）</div>
+    <textarea id="rText" rows="2" maxlength="60" placeholder="比如：今天阿姨手抖了"></textarea>
+    <div style="margin-top:14px"><button class="btn primary" id="rSubmit" disabled style="opacity:.5">提交</button></div>
+    <div class="hint" style="text-align:center">演示版：点评只保存在你自己的浏览器里</div>
+  `);
+  const tagsBox=document.getElementById('rTags'), sub=document.getElementById('rSubmit');
+  const setUp=v=>{up=v;sel.clear();document.getElementById('vUp').classList.toggle('on',v);document.getElementById('vDown').classList.toggle('on',!v);
+    tagsBox.innerHTML=(v?POS_TAGS:NEG_TAGS).map(t=>`<button class="chip" data-t="${t}">${t}</button>`).join('');sub.disabled=false;sub.style.opacity=1};
+  document.getElementById('vUp').onclick=()=>setUp(true);
+  document.getElementById('vDown').onclick=()=>setUp(false);
+  tagsBox.onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;b.classList.toggle('on');sel.has(b.dataset.t)?sel.delete(b.dataset.t):sel.add(b.dataset.t)};
+  sub.onclick=()=>{
+    if(up===null)return;
+    myReviews.push({dish:id,up,tags:[...sel],text:document.getElementById('rText').value.trim(),ts:Date.now(),user:'我',mine:true});
+    store.set('reviews',myReviews);
+    renderAllViews();
+    toast(up?'感谢点评！口碑分已更新':'收到，已帮其他同学记下这个雷');
+    openDish(id);
+  };
+}
+function toggleFav(id){
+  favs.includes(id)?favs=favs.filter(x=>x!==id):favs.push(id);
+  store.set('favs',favs);renderMe();openDish(id);
+}
+let toastT;
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),1800)}
+
+/* ========== 事件 ========== */
+function switchView(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
+  document.querySelectorAll('nav.tabbar button').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
+  if(v==='me')renderMe();
+  window.scrollTo(0,0);
+  try{history.replaceState(null,'','#'+v)}catch(e){}
+}
+document.querySelector('nav.tabbar').onclick=e=>{const b=e.target.closest('[data-view]');if(b)switchView(b.dataset.view)};
+
+document.addEventListener('click',e=>{
+  const c=e.target.closest('[data-close]'); if(c){closeSheet();return}
+  const r=e.target.closest('[data-review]'); if(r){openReview(r.dataset.review);return}
+  const f=e.target.closest('[data-fav]'); if(f){toggleFav(f.dataset.fav);return}
+  const d=e.target.closest('[data-dish]'); if(d){openDish(d.dataset.dish);return}
+  const chip=e.target.closest('[data-group] .chip');
+  if(chip){const g=chip.parentElement;if(g.dataset.multi)chip.classList.toggle('on');else{g.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));chip.classList.add('on')}return}
+  const pchip=e.target.closest('[data-pgroup] .chip');
+  if(pchip){profile[pchip.parentElement.dataset.pgroup]=pchip.dataset.v;store.set('profile',profile);applyProfile();renderMe();toast('口味档案已保存');return}
+});
+document.getElementById('mask').onclick=closeSheet;
+document.getElementById('goPick').onclick=()=>{pickSeed+=3;renderPicks(currentFilter(),false)};
+const doAsk=()=>{const t=document.getElementById('askInput').value.trim();if(!t){toast('先说说你想吃什么');return}pickSeed+=3;renderPicks(parseAsk(t),true)};
+document.getElementById('askBtn').onclick=doAsk;
+document.getElementById('askInput').onkeydown=e=>{if(e.key==='Enter')doAsk()};
+document.querySelectorAll('#rankTabs button').forEach(b=>b.onclick=()=>{rankMode=b.dataset.v;document.querySelectorAll('#rankTabs button').forEach(x=>x.classList.toggle('on',x===b));renderRank()});
+['q','fCanteen','fSort'].forEach(id=>document.getElementById(id).addEventListener('input',renderAll));
+document.getElementById('resetBtn').onclick=()=>{if(!confirm('清空你的点评、收藏和口味档案？'))return;myReviews=[];favs=[];profile={budget:'15',taste:'any',canteen:'any'};store.set('reviews',myReviews);store.set('favs',favs);store.set('profile',profile);applyProfile();renderAllViews();toast('已清空')};
+
+function applyProfile(){
+  const set=(g,v)=>document.querySelectorAll(`[data-group="${g}"] .chip`).forEach(b=>b.classList.toggle('on',b.dataset.v===v));
+  set('budget',profile.budget);set('taste',profile.taste);set('canteen',profile.canteen);
+}
+
+/* ========== 初始化 ========== */
+(function init(){
+  const cg=document.querySelector('[data-group="canteen"]'), pg=document.querySelector('[data-pgroup="canteen"]');
+  CANTEENS.forEach(c=>{cg.insertAdjacentHTML('beforeend',`<button class="chip" data-v="${c.id}">${c.name.split('·')[0]}</button>`)});
+  pg.innerHTML=`<button class="chip" data-v="any">都行</button>`+CANTEENS.map(c=>`<button class="chip" data-v="${c.id}">${c.name.split('·')[0]}</button>`).join('');
+  document.getElementById('fCanteen').innerHTML=`<option value="any">全部食堂</option>`+CANTEENS.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  const h=new Date().getHours();
+  document.getElementById('mealTime').textContent=(h<10?'🌅 早餐时间':h<14?'☀️ 午饭时间':h<17?'🍵 下午茶':h<21?'🌙 晚饭时间':'🌃 夜宵时间')+' · '+(new Date().getMonth()+1)+'月'+new Date().getDate()+'日';
+  applyProfile();
+  renderAllViews();
+  const v=(location.hash||'').slice(1); if(['home','all','me','about'].includes(v))switchView(v);
+})();
+</script>
+</body>
+</html>
