@@ -141,9 +141,54 @@ textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px
 .flow span{background:var(--chip);padding:4px 10px;border-radius:8px}
 .flow em{font-style:normal;color:var(--sub)}
 .view{display:none}.view.on{display:block}
+header.top h1,header.top .meal{white-space:nowrap}
+details.alert summary{list-style:none;cursor:pointer;font-weight:700;display:flex;justify-content:space-between;gap:8px}
+details.alert summary>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+details.alert summary::-webkit-details-marker{display:none}
+details.alert summary .tg{font-weight:400;opacity:.8;flex:none}
+details.alert[open] summary .tg{display:none}
+details.alert .rows{margin-top:6px}
+.backup{font-size:10px;padding:1px 6px;border-radius:6px;background:var(--chip);color:var(--sub);font-weight:600}
+.win-link{display:inline-block;margin-top:2px;font-size:12px;color:var(--brand)}
+.sub-h{font-size:13px;font-weight:700;color:var(--sub);margin:12px 0 2px}
+.intro{display:none}
+@media (min-width:960px){
+  :root{--desk:#ebe8e1}
+  body{display:flex;align-items:center;justify-content:center;gap:72px;min-height:100vh;padding:24px;background:var(--desk)}
+  .intro{display:block;max-width:440px}
+  .intro .badge{display:inline-block;font-size:13px;padding:4px 12px;border-radius:999px;background:var(--brand-soft);color:var(--brand);font-weight:600}
+  .intro h1{font-size:40px;line-height:1.2;margin:18px 0 12px}
+  .intro p{color:var(--sub);font-size:15px;margin:0 0 22px}
+  .intro .try .t{font-size:13px;font-weight:700;margin-bottom:10px}
+  .intro .try button{display:flex;gap:12px;align-items:center;width:100%;text-align:left;padding:11px 14px;margin-bottom:8px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-size:14px;transition:border-color .15s,transform .15s}
+  .intro .try button:hover{border-color:var(--brand);transform:translateX(4px)}
+  .intro .try b{flex:none;width:24px;height:24px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:12px}
+  .intro .foot{font-size:12px;margin-top:18px}
+  .phone{position:relative;flex:none;width:400px;height:min(860px,calc(100vh - 48px));border-radius:46px;border:10px solid #1b1c1f;overflow:hidden;transform:translateZ(0);background:var(--bg);box-shadow:0 30px 80px rgba(0,0,0,.18)}
+  .phone .app{height:100%;min-height:0;overflow-y:auto;scrollbar-width:none}
+  .phone .app::-webkit-scrollbar{display:none}
+  .sheet{max-height:88%}
+}
+@media (min-width:960px) and (prefers-color-scheme: dark){:root{--desk:#0b0c0d}}
 </style>
 </head>
 <body>
+<aside class="intro">
+  <div class="badge">🍱 校园食堂点评推荐 · Demo</div>
+  <h1>别再纠结<br>“食堂吃什么”</h1>
+  <p>大众点评给店打分，这里给<b>每道菜</b>打分：只看最近一周的口碑，5 秒写完一条点评，一键告诉你今天吃什么、哪个窗口要绕开。</p>
+  <div class="try">
+    <div class="t">👉 点下面的步骤，右边的手机会跟着演示</div>
+    <button data-try="pick"><b>1</b>一键推荐：按预算和口味给出 3 个选择和理由</button>
+    <button data-try="ask"><b>2</b>一句话推荐：“预算12，想吃辣的，赶时间”</button>
+    <button data-try="alert"><b>3</b>踩雷预警：看一道最近口碑下滑的菜</button>
+    <button data-try="window"><b>4</b>窗口榜：哪个窗口值得去、该点哪道</button>
+    <button data-try="review"><b>5</b>写一条 5 秒点评，口碑分实时变化</button>
+    <button data-try="about"><b>6</b>设计说明：痛点、取舍与后续规划</button>
+  </div>
+  <p class="foot">用手机打开同一个网址，就是完整的 App 体验 · 数据为演示用虚构数据</p>
+</aside>
+<div class="phone">
 <div class="app">
   <header class="top">
     <h1>🍱 食堂吃什么</h1>
@@ -194,11 +239,12 @@ textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px
     <div class="sec-title"><h2>✨ 今日新菜</h2><small>近 7 天上新</small></div>
     <div class="hscroll" id="newList"></div>
 
-    <div class="sec-title"><h2>📊 本周榜单</h2><small>只算近 7 天的评价</small></div>
+    <div class="sec-title" id="rankTitle"><h2>📊 本周榜单</h2><small>只算近 7 天的评价</small></div>
     <div class="card">
       <div class="tabs2" id="rankTabs">
         <button class="on" data-v="red">🔥 红榜</button>
         <button data-v="black">⚠️ 避雷榜</button>
+        <button data-v="window">🏪 窗口榜</button>
       </div>
       <div id="rankList"></div>
     </div>
@@ -263,6 +309,7 @@ textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px
         <tr><td>学生懒得写长评，评价太少</td><td><b>5 秒点评</b>：👍/👎 + 选标签，文字可以不写</td></tr>
         <tr><td>站在食堂门口不知道吃什么</td><td><b>一键推荐</b>，直接给 1~3 个选择和理由，不让你自己翻列表</td></tr>
         <tr><td>怕踩雷</td><td><b>踩雷预警</b>：某道菜最近差评突然变多就标红</td></tr>
+        <tr><td>想避开踩雷窗口，但同一个窗口里也有好菜</td><td><b>窗口榜</b>：给窗口排名，同时标出这个窗口哪道必点、哪道慎点</td></tr>
       </table>
     </div>
     <div class="card">
@@ -274,7 +321,7 @@ textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px
       <h3>AI 用在哪</h3>
       <ul>
         <li><b>评论总结</b>：把几十条短评压缩成一句话，加上优点和缺点</li>
-        <li><b>踩雷预警</b>：近 3 天好评率比之前明显下降就提醒</li>
+        <li><b>踩雷预警</b>：近 3 天好评率比之前明显下降就提醒，并汇总到窗口层面</li>
         <li><b>对话式推荐</b>：用一句话说需求，比如“预算 12，想吃辣，赶时间”</li>
         <li><b>拍照识菜</b>（规划中）：拍一下自动认出是哪道菜，降低点评门槛</li>
       </ul>
@@ -308,6 +355,7 @@ textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px
 <div class="mask" id="mask"></div>
 <div class="sheet" id="sheet"><div class="in" id="sheetIn"></div></div>
 <div class="toast" id="toast"></div>
+</div>
 
 <script>
 /* ========== 模拟数据 ========== */
@@ -336,8 +384,8 @@ const DISHES = [
   ['d16','白切鸡饭','🐔','c2','烧腊窗口',16,['rice','meat','light'],.6,{drop:1}],
   ['d17','砂锅米线','🍜','c2','砂锅窗口',13,['noodle','light'],.81],
   ['d18','酸菜鱼米线','🐟','c2','砂锅窗口',16,['noodle','spicy'],.83,{isNew:1}],
-  ['d19','鸡蛋灌饼','🥚','c2','早餐窗口',5,['light'],.87,{fast:1}],
-  ['d20','小笼包（8个）','🥟','c2','早餐窗口',7,['meat'],.76,{fast:1}],
+  ['d19','鸡蛋灌饼','🥚','c2','早餐窗口',5,['light'],.87,{fast:1,meal:'b'}],
+  ['d20','小笼包（8个）','🥟','c2','早餐窗口',7,['meat'],.76,{fast:1,meal:'b'}],
   ['d21','重庆小面','🍜','c3','川味窗口',11,['noodle','spicy'],.8,{fast:1}],
   ['d22','水煮肉片','🥩','c3','川味窗口',17,['rice','spicy','meat'],.84],
   ['d23','宫保鸡丁','🥜','c3','川味窗口',13,['rice','spicy','meat'],.72],
@@ -474,8 +522,17 @@ function currentFilter(){
   const g=name=>[...document.querySelectorAll(`[data-group="${name}"] .chip.on`)].map(b=>b.dataset.v);
   return {budget:+g('budget')[0], taste:g('taste')[0], canteen:g('canteen')[0], extra:g('extra')};
 }
+function matchStrict(d,f){
+  if(f.taste==='spicy'&&!d.tags.includes('spicy'))return false;
+  if(f.taste==='light'&&!d.tags.includes('light'))return false;
+  if(f.extra.includes('noodle')&&!d.tags.includes('noodle'))return false;
+  if(f.extra.includes('rice')&&!d.tags.includes('rice'))return false;
+  if(f.extra.includes('new')&&!d.isNew)return false;
+  return true;
+}
 function recommend(f, seed){
   const r=rng(seed);
+  const morning=new Date().getHours()<10;
   const list=DISHES.map(d=>{
     const s=S(d.id);
     const reasons=[]; let sc=s.smooth*100;
@@ -489,16 +546,24 @@ function recommend(f, seed){
     if(f.extra.includes('rice')){ if(d.tags.includes('rice')) sc+=20; else sc-=30 }
     if(d.isNew){ sc+= f.extra.includes('new')?25:6; reasons.push(`${d.isNew} 天前上新`) } else if(f.extra.includes('new')) sc-=10;
     if(s.alert) sc-=40;
+    if(d.meal==='b'){ if(morning){sc+=12;reasons.push('早餐时段供应')} else sc-=30 }
     if(s.recent7.length) reasons.unshift(`近 7 天 ${Math.round(s.recent7.filter(x=>x.up).length/s.recent7.length*100)}% 好评`);
     const topPos=Object.entries(s.tagCount).filter(([t])=>POS_TAGS.includes(t)).sort((a,b)=>b[1]-a[1])[0];
     if(topPos) reasons.push(`常被夸「${topPos[0]}」`);
     sc += r()*14; // 一点随机，避免天天同一道
     if(favs.includes(d.id)){sc+=5;reasons.push('你收藏过')}
-    return {d,sc,reasons};
+    return {d,sc,reasons,strict:matchStrict(d,f)};
   }).filter(Boolean).sort((a,b)=>b.sc-a.sc);
-  // 尽量不推同一个窗口
+  // 先放完全符合条件的，不够再放宽补位；尽量不推同一个窗口
   const res=[],wins=new Set();
-  for(const x of list){ if(res.length>=3)break; const k=x.d.canteen+x.d.win; if(wins.has(k))continue; wins.add(k); res.push(x) }
+  for(const pass of [true,false]){
+    for(const x of list){
+      if(res.length>=3)break;
+      if(x.strict!==pass)continue;
+      const k=x.d.canteen+x.d.win; if(wins.has(k))continue;
+      wins.add(k); if(!pass)x.backup=true; res.push(x);
+    }
+  }
   return res;
 }
 let pickSeed=Date.now()%100000;
@@ -519,11 +584,11 @@ function renderPicks(f,fromAsk){
       ${i===0?'<div class="rank">首选</div>':''}
       <div class="dish" style="padding:${i===0?'6px':'0'} 0 0">
         <div class="emo">${d.emoji}</div>
-        <div class="info"><div class="name">${d.name}${d.isNew?'<span class="tag-new">新</span>':''}</div>
+        <div class="info"><div class="name">${d.name}${d.isNew?'<span class="tag-new">新</span>':''}${x.backup?'<span class="backup">备选</span>':''}</div>
           <div class="meta">${C(d.canteen).name} · ${d.win} · ¥${d.price}</div></div>
         <div class="score"><b style="color:${scoreColor(s.score)}">${s.score}</b><span>近期口碑</span></div>
       </div>
-      <div class="why">💬 ${x.reasons.slice(0,4).join('，')}</div>
+      <div class="why">💬 ${x.backup?'符合条件的不多，放宽条件补一个：':''}${x.reasons.slice(0,4).join('，')}</div>
     </div>`);
   });
   parts.push(`<div style="display:flex;gap:10px"><button class="btn ghost" style="flex:1" id="againBtn">🔄 换一批</button></div>`);
@@ -562,8 +627,8 @@ function renderAlerts(){
   const al=DISHES.filter(d=>S(d.id).alert);
   const box=document.getElementById('alertBox');
   if(!al.length){box.innerHTML='';return}
-  box.innerHTML=`<div class="alert"><div style="font-weight:700;margin-bottom:4px">🚨 踩雷预警 · 这几道菜最近 3 天差评突然变多</div>
-    ${al.map(d=>{const s=S(d.id);return `<div class="row" data-dish="${d.id}"><span>${d.emoji} ${d.name} <span style="opacity:.75">${C(d.canteen).name.split('·')[0]}·${d.win}</span></span><b>${Math.round(s.rateB*100)}% → ${Math.round(s.rate3*100)}%</b></div>`}).join('')}</div>`;
+  box.innerHTML=`<details class="alert"><summary><span>🚨 踩雷预警：${al.length} 道菜近期差评突增</span><span class="tg">${al[0].name}${al.length>1?' 等':''} ▾</span></summary>
+    <div class="rows">${al.map(d=>{const s=S(d.id);return `<div class="row" data-dish="${d.id}"><span>${d.emoji} ${d.name} <span style="opacity:.75">${C(d.canteen).name.split('·')[0]}·${d.win}</span></span><b>好评 ${Math.round(s.rateB*100)}% → ${Math.round(s.rate3*100)}%</b></div>`}).join('')}</div></details>`;
 }
 function renderNew(){
   const list=DISHES.filter(d=>d.isNew).sort((a,b)=>a.isNew-b.isNew);
@@ -572,8 +637,55 @@ function renderNew(){
     <div class="m">${C(d.canteen).name.split('·')[0]} · ¥${d.price}</div>
     <div class="m">${d.isNew===1?'昨天':d.isNew+' 天前'}上新 · <b style="color:${scoreColor(s.score)}">${s.recent7.length?Math.round(s.recent7.filter(r=>r.up).length/s.recent7.length*100)+'%好评':'待评价'}</b></div></div>`}).join('');
 }
+function windowStats(){
+  const m={};
+  DISHES.forEach(d=>{const k=d.canteen+'|'+d.win;(m[k]=m[k]||{key:k,canteen:d.canteen,win:d.win,dishes:[]}).dishes.push(d)});
+  return Object.values(m).map(w=>{
+    let n=0,sum=0;
+    w.dishes.forEach(d=>{const s=S(d.id),c=Math.max(1,s.recent7.length);n+=c;sum+=s.smooth*c});
+    const sorted=w.dishes.slice().sort((a,b)=>S(b.id).smooth-S(a.id).smooth);
+    const alerts=w.dishes.filter(d=>S(d.id).alert);
+    return {...w,sorted,alerts,score:Math.round(sum/n*100)-alerts.length*5,n:w.dishes.reduce((a,d)=>a+S(d.id).recent7.length,0),best:sorted[0],worst:sorted.length>1&&S(sorted[sorted.length-1].id).score<75?sorted[sorted.length-1]:null};
+  }).sort((a,b)=>b.score-a.score);
+}
+function winRow(w,i,mode){
+  const meta=mode==='bad'
+    ?(w.alerts.length?`近期差评多：${w.alerts.map(d=>d.name).join('、')}`:w.worst?`慎点：${w.worst.name}`:'整体口碑一般')+(w.best&&!w.alerts.includes(w.best)?` · 还行：${w.best.name}`:'')
+    :`必点：${w.best.name}`+(w.worst?` · 慎点：${w.worst.name}`:'');
+  return `<div class="dish clickable" data-win="${w.key}">
+    <div class="emo">${mode==='bad'?'🙅':['🥇','🥈','🥉'][i]||'🏪'}</div>
+    <div class="info"><div class="name">${w.win}${w.alerts.length?'<span class="tag-warn">有菜在翻车</span>':''}</div>
+      <div class="meta">${C(w.canteen).name.split('·')[0]} · ${meta}</div></div>
+    <div class="score"><b style="color:${scoreColor(w.score)}">${w.score}</b><span>${w.dishes.length} 道菜</span></div>
+  </div>`;
+}
+function openWindow(key){
+  const w=windowStats().find(x=>x.key===key);
+  const best=w.best, bs=S(best.id);
+  let ai=`这个窗口近 7 天共 ${w.n} 条评价，最稳的是「${best.name}」（口碑 ${bs.score}）。`;
+  if(w.alerts.length) ai+=`⚠️「${w.alerts.map(d=>d.name).join('、')}」最近 3 天差评突然变多，建议先别点。`;
+  else if(w.worst) ai+=`「${w.worst.name}」评价一般，可以换一道。`;
+  else ai+='整个窗口都比较稳，随便点。';
+  openSheet(`
+    <div class="hero"><div class="emo">🏪</div><div>
+      <h3>${w.win}</h3><div style="color:var(--sub);font-size:13px">${C(w.canteen).name} · ${w.dishes.length} 道菜</div>
+      <div style="font-size:18px;font-weight:700;color:${scoreColor(w.score)}">窗口口碑 ${w.score}</div>
+    </div></div>
+    <div class="ai"><div class="t">✨ AI 一句话总结</div>${ai}</div>
+    <div class="sec-title"><h2>这个窗口的菜</h2><small>按近期口碑排序</small></div>
+    <div class="card">${w.sorted.map(d=>dishRow(d,`¥${d.price}`+(d===best?' · 👍 本窗口必点':'')+(S(d.id).alert?' · 最近差评变多':''))).join('')}</div>
+  `);
+}
 let rankMode='red';
+function setRank(v){rankMode=v;document.querySelectorAll('#rankTabs button').forEach(x=>x.classList.toggle('on',x.dataset.v===v));renderRank()}
 function renderRank(){
+  if(rankMode==='window'){
+    const ws=windowStats();
+    document.getElementById('rankList').innerHTML=`<div class="hint" style="margin:0 0 4px">同一个窗口里也有好有坏，所以除了窗口排名，还会告诉你该点哪道</div>
+      <div class="sub-h">🏆 最值得去</div>${ws.slice(0,5).map((w,i)=>winRow(w,i,'good')).join('')}
+      <div class="sub-h">🙅 最容易踩雷</div>${ws.slice(-3).reverse().map((w,i)=>winRow(w,i,'bad')).join('')}`;
+    return;
+  }
   const eligible=DISHES.filter(d=>S(d.id).recent7.length>=3);
   let list;
   if(rankMode==='red') list=eligible.filter(d=>!S(d.id).alert).sort((a,b)=>S(b.id).smooth-S(a.id).smooth).slice(0,6);
@@ -626,6 +738,7 @@ function openDish(id){
       <h3>${d.name} ${d.isNew?'<span class="tag-new">新</span>':''}</h3>
       <div style="color:var(--sub);font-size:13px">${C(d.canteen).name} · ${d.win}</div>
       <div style="font-size:18px;font-weight:700;color:var(--brand)">¥${d.price}</div>
+      <button class="win-link" data-win="${d.canteen}|${d.win}">看看这个窗口的其他菜 ›</button>
     </div></div>
     ${s.alert?`<div class="alert" style="margin:14px 0 0">🚨 <b>踩雷预警</b>：最近 3 天好评率 ${Math.round(s.rateB*100)}% → ${Math.round(s.rate3*100)}%，最近吃过的同学说要小心</div>`:''}
     <div class="stats">
@@ -671,10 +784,12 @@ function openReview(id){
   tagsBox.onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;b.classList.toggle('on');sel.has(b.dataset.t)?sel.delete(b.dataset.t):sel.add(b.dataset.t)};
   sub.onclick=()=>{
     if(up===null)return;
+    const before=S(id).score;
     myReviews.push({dish:id,up,tags:[...sel],text:document.getElementById('rText').value.trim(),ts:Date.now(),user:'我',mine:true});
     store.set('reviews',myReviews);
     renderAllViews();
-    toast(up?'感谢点评！口碑分已更新':'收到，已帮其他同学记下这个雷');
+    const after=S(id).score, diff=after===before?'':`，口碑分 ${before} → ${after}`;
+    toast((up?'感谢点评':'已帮同学们记下这个雷')+diff);
     openDish(id);
   };
 }
@@ -690,7 +805,7 @@ function switchView(v){
   document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
   document.querySelectorAll('nav.tabbar button').forEach(b=>b.classList.toggle('on',b.dataset.view===v));
   if(v==='me')renderMe();
-  window.scrollTo(0,0);
+  window.scrollTo(0,0); document.querySelector('.app').scrollTop=0;
   try{history.replaceState(null,'','#'+v)}catch(e){}
 }
 document.querySelector('nav.tabbar').onclick=e=>{const b=e.target.closest('[data-view]');if(b)switchView(b.dataset.view)};
@@ -699,6 +814,7 @@ document.addEventListener('click',e=>{
   const c=e.target.closest('[data-close]'); if(c){closeSheet();return}
   const r=e.target.closest('[data-review]'); if(r){openReview(r.dataset.review);return}
   const f=e.target.closest('[data-fav]'); if(f){toggleFav(f.dataset.fav);return}
+  const w=e.target.closest('[data-win]'); if(w){openWindow(w.dataset.win);return}
   const d=e.target.closest('[data-dish]'); if(d){openDish(d.dataset.dish);return}
   const chip=e.target.closest('[data-group] .chip');
   if(chip){const g=chip.parentElement;if(g.dataset.multi)chip.classList.toggle('on');else{g.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));chip.classList.add('on')}return}
@@ -710,10 +826,20 @@ document.getElementById('goPick').onclick=()=>{pickSeed+=3;renderPicks(currentFi
 const doAsk=()=>{const t=document.getElementById('askInput').value.trim();if(!t){toast('先说说你想吃什么');return}pickSeed+=3;renderPicks(parseAsk(t),true)};
 document.getElementById('askBtn').onclick=doAsk;
 document.getElementById('askInput').onkeydown=e=>{if(e.key==='Enter')doAsk()};
-document.querySelectorAll('#rankTabs button').forEach(b=>b.onclick=()=>{rankMode=b.dataset.v;document.querySelectorAll('#rankTabs button').forEach(x=>x.classList.toggle('on',x===b));renderRank()});
+document.querySelectorAll('#rankTabs button').forEach(b=>b.onclick=()=>setRank(b.dataset.v));
 ['q','fCanteen','fSort'].forEach(id=>document.getElementById(id).addEventListener('input',renderAll));
 document.getElementById('resetBtn').onclick=()=>{if(!confirm('清空你的点评、收藏和口味档案？'))return;myReviews=[];favs=[];profile={budget:'15',taste:'any',canteen:'any'};store.set('reviews',myReviews);store.set('favs',favs);store.set('profile',profile);applyProfile();renderAllViews();toast('已清空')};
 
+document.querySelector('.intro').onclick=e=>{
+  const b=e.target.closest('[data-try]'); if(!b)return;
+  closeSheet(); const t=b.dataset.try;
+  if(t==='pick'){switchView('home');pickSeed+=3;renderPicks(currentFilter(),false)}
+  if(t==='ask'){switchView('home');const i=document.getElementById('askInput');i.value='预算12，想吃辣的，赶时间';pickSeed+=3;renderPicks(parseAsk(i.value),true)}
+  if(t==='alert'){const a=DISHES.find(d=>S(d.id).alert);setTimeout(()=>openDish(a?a.id:'d3'),150)}
+  if(t==='window'){switchView('home');setRank('window');setTimeout(()=>document.getElementById('rankTitle').scrollIntoView({behavior:'smooth',block:'start'}),50)}
+  if(t==='review'){setTimeout(()=>openReview('d1'),150)}
+  if(t==='about'){switchView('about')}
+};
 function applyProfile(){
   const set=(g,v)=>document.querySelectorAll(`[data-group="${g}"] .chip`).forEach(b=>b.classList.toggle('on',b.dataset.v===v));
   set('budget',profile.budget);set('taste',profile.taste);set('canteen',profile.canteen);
